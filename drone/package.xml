@@ -8,6 +8,8 @@
   <license>GPL-3.0</license>
 
   <depend>rclcpp</depend>
+  <depend>mavlink</depend>
+  <depend>mavros</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
