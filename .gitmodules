@@ -7,3 +7,6 @@
 [submodule "deps/Micro-XRCE-DDS-Agent"]
 	path = deps/Micro-XRCE-DDS-Agent
 	url = https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+[submodule "deps/px4-ros2-interface-lib"]
+	path = deps/px4-ros2-interface-lib
+	url = https://github.com/Auterion/px4-ros2-interface-lib
