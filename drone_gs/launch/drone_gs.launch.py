@@ -1,3 +1,7 @@
+"""
+Top Level Launch File for the Ground Station
+"""
+
 from launch_ros.substitutions import FindPackageShare
 
 from launch import LaunchDescription

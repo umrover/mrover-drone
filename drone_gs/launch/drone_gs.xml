@@ -1,6 +1,0 @@
-<launch>
-    <!-- <node pkg="mavros" exec="px4.launch" namespace="mavros"/> -->
-    <include file="$(find mavros)/launch/px4.launch">
-        <arg name="fcu_url" value="udp://:14445@" />
-    </include>
-</launch>
