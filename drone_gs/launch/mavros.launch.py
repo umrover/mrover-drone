@@ -90,6 +90,9 @@ def generate_launch_description():
                 {'fcu_protocol': fcu_protocol},
                 LaunchConfiguration('pluginlists_yaml'),
                 LaunchConfiguration('config_yaml')
+        ],
+        remappings=[
+            ('/mavros/global_position/global', '/drone_odom'),
         ]
     )
 
