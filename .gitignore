@@ -1,5 +1,6 @@
 devel/
 logs/
+install/
 build/
 bin/
 lib/
@@ -49,3 +50,8 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+deps/build
+deps/install
+deps/log
+log/
