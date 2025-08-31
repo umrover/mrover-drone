@@ -4,7 +4,7 @@
   <name>drone</name>
   <version>2025.0.0</version>
   <description>Root Package for MRover Drone</description>
-  <maintainer email="mvielmet@umich.edu">marshallvielmetti</maintainer>
+  <maintainer email="aboyarov@umich.edu">artyom-boyarov</maintainer>
   <license>GPL-3.0</license>
 
   <buildtool_depend>eigen3_cmake_module</buildtool_depend>
