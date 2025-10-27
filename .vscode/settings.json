@@ -9,5 +9,8 @@
         "/opt/ros/humble/lib/python3.10/site-packages",
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
     ],
-    "cmake.sourceDirectory": "/home/artyom/ros2_ws/src/mrover_drone/drone"
+    "cmake.sourceDirectory": "/home/artyom/ros2_ws/src/mrover_drone/drone",
+    "files.associations": {
+        "regex": "cpp"
+    }
 }

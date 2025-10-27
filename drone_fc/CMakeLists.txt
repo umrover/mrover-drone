@@ -5,11 +5,27 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(px4_ros2_cpp REQUIRED)
+
+
+include_directories(includ)
+include_directories(include ${Eigen3_INCLUDE_DIRS})
+
+add_executable(fc_mode_search
+  src/SearchMode.cpp)
+
+ament_target_dependencies(fc_mode_search PUBLIC rclcpp px4_ros2_cpp Eigen3)
+
+install(TARGETS
+  fc_mode_search
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
