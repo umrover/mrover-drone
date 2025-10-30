@@ -18,6 +18,7 @@ find_package(ament_cmake REQUIRED)
 #   We need a find_package for each <build_depend>, <buildtool_depend>, and
 #   <exec_depend> dependency from package.xml.
 find_package(Eigen3 REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(px4_ros2_cpp REQUIRED)
 

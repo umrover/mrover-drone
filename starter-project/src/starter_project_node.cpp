@@ -117,7 +117,7 @@ public:
                 // do not specify a heading. At close distances, the heading 
                 // calculation can give an undefined result.
                 if(distance_to_setpoint<1.0f)
-                    _goto_setpoint->update(current_position);
+                    _goto_setpoint->update(current_setpoint);
                 else
                     _goto_setpoint->update(current_position, target_heading);
                    
