@@ -119,7 +119,7 @@ public:
                 if(distance_to_setpoint<1.0f)
                     _goto_setpoint->update(current_setpoint);
                 else
-                    _goto_setpoint->update(current_position, target_heading);
+                    _goto_setpoint->update(current_setpoint, target_heading);
                    
                 break;
                 }
