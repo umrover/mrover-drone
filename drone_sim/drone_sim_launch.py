@@ -6,17 +6,24 @@ import os
 import shutil
 
 DEFAULT_DOWNLOAD_DIR = "https://github.com/PX4/PX4-gazebo-models/archive/refs/heads/main.zip"
-DEFAULT_MODEL_STORE_DIR = "~/ros2_ws/src/mrover_drone/drone_sim/model_store"
+DEFAULT_MODEL_STORE_DIR = os.path.expanduser("~/ros2_ws/src/mrover_drone/drone_sim/model_store")
+PX4_PROCESS_DIR = os.path.expanduser("~/ros2_ws/src/mrover_drone/deps/PX4-Autopilot")
 
 
 def run(cmd):
     process_handle = subprocess.Popen(['bash', '-c', cmd], cwd='.')
     return process_handle
 
+def startPX4(cmd):
+    PX4_process = subprocess.Popen([
+        'gnome-terminal', '--', 'bash', '-c', f"{cmd}; exec bash"])
+    return PX4_process
+
 def main():
     parser = argparse.ArgumentParser(description='Gazebo simulation')
 
     parser.add_argument('--world', help='World to run in Gazebo', required=False, default="default")
+    parser.add_argument('--model', help='Model to place in simulation', required=False, default="gz_x500")
     parser.add_argument('--gz_partition', help='Gazebo partition to run in', required=False)
     parser.add_argument('--gz_ip', help='Outgoing network interface to use for traffic',required=False)
     parser.add_argument('--interactive',help='Run in interactive mode', required=False, default=False, action='store_true')
@@ -88,6 +95,24 @@ def main():
         os.system(f'mv {args.model_store}/PX4-gazebo-models-main/server.config {args.model_store}/')
         os.system(f'rm {args.model_store}/resources.zip')
         os.system(f'rm -rf {args.model_store}/PX4-gazebo-models-main/')
+
+    # launch px4 sitl
+    print('> Starting separate PX4 Process...')
+    if not args.dryrun:
+        env = os.environ.copy()
+        env.update({
+            "PX4_GZ_STANDALONE": "1",
+            "PX4_SYS_AUTOSTART": "4001",
+            "PX4_SIM_MODEL": args.model,
+            "PX4_GZ_WORLD": args.world,
+        })
+        cmd = f"{PX4_PROCESS_DIR}/build/px4_sitl_default/bin/px4"
+
+        try:
+            startPX4(cmd)
+        except KeyboardInterrupt:
+            exit(0)
+
 
     # Launch gazebo simulation
     print('> Launching gazebo simulation...')
