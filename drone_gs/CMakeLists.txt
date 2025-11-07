@@ -10,7 +10,19 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+find_package(px4_ros2_cpp REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
 
+include_directories(include ${Eigen3_INCLUDE_DIRS})
+
+add_executable(search_path_node src/search_path.cpp)
+ament_target_dependencies(search_path_node
+  rclcpp
+  Eigen3
+  px4_ros2_cpp
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
