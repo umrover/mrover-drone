@@ -1,0 +1,44 @@
+[project]
+name = "mrover-drone"
+version = "2025.0.0"
+description = "MRover Drone Python Code"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE.md" }
+maintainers = [
+    { name = "Michigan Mars Rover Team", email = "rover-software-team@umich.edu" }
+]
+dependencies = [
+    "empy==3.3.4",
+    "numpy==1.26.4",
+    "shapely==2.0.6",
+    "moteus==0.3.72",
+    "pymap3d==3.1.0",
+    "pyubx2==1.2.45",
+    "lark==1.1.2",
+    "transforms3d==0.4.2",
+    "colcon-common-extensions==0.3.0",
+    "django>=5.0",
+    "daphne>=4.1",
+    "channels>=4.1",
+    "opencv-python>=4.9",
+    "graphviz>=0.21"
+]
+
+[project.optional-dependencies]
+dev = [
+    # If you update these, be sure to update the correspondig version checkers in style.sh
+    "black==24.8.0",
+    "mypy==1.11.2",
+    "ipython==8.27.0",
+]
+
+[build-system]
+requires = ["flit_core"]
+build-backend = "flit_core.buildapi"
+
+[project.urls]
+"Homepage" = "https://mrover.org"
+
+[tool.black]
+line-length = 120
