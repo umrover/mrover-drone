@@ -21,27 +21,33 @@ public:
     explicit StarterProject(rclcpp::Node & node)
     : ModeBase(node, kNodeName)
     {
-        // TODO: Initialize the _goto_setpoint, _vehicle_global_position, and
+        // DONE: Initialize the _goto_setpoint, _vehicle_global_position, and
         // _vehicle_local_position shared pointers here.
-        _goto_setpoint;
-        _vehicle_global_position;
-        _vehicle_local_position;
 
-        // TODO: Define some interesting setpoints to fly to.
+        _goto_setpoint = std::make_shared<px4_ros2::GotoGlobalSetpointType>(*this);
+        _vehicle_global_position = std::make_shared<px4_ros2::OdometryGlobalPosition>(*this);
+        _vehicle_local_position  = std::make_shared<px4_ros2::OdometryLocalPosition>(*this);
+
+        // DONE: Define some interesting setpoints to fly to.
         _setpoints = {
-
+            Eigen::Vector3f(3.0f, 0.0f, 0.0f),
+            Eigen::Vector3f(1.0f, 3.0f, 0.0f),
+            Eigen::Vector3f(-1.0f, -3.0f, 0.0f),
+            Eigen::Vector3f(3.0f, 0.0f, 0.0f)
         };
     }
 
-    void onActivate() override {
-    }
+    void onActivate() override {}
     void onDeactivate() override {}
 
 
     bool positionReached(const Eigen::Vector3d & target_position, float threshold = 0.1f) {
-        // TODO: Use _vehicle_global_position->position() to get the current position
+        // DONE: Use _vehicle_global_position->position() to get the current position
         // and use px4_ros2::horizontalDistanceToGlobalPosition to check if the distance
         // to target_position is less than threshold.
+        Eigen::Vector3d position = _vehicle_global_position->position();
+        float distance = px4_ros2::horizontalDistanceToGlobalPosition(position, target_position);
+        return(distance < threshold);
         
     }
 
@@ -51,14 +57,14 @@ public:
         // If the starting setpoint has not been set yet, _starting_setpoint
         // should be set to the current global position of the vehicle.
         if (!_starting_setpoint_set) {
-
-            // TODO: Set the _starting_setpoint variable to the current global position
+            _starting_setpoint = _vehicle_global_position->position();
+            _starting_setpoint_set = true;
+            // DONE: Set the _starting_setpoint variable to the current global position
             // of the vehicle
         }
 
-        // TODO: Get the current position.
-        Eigen::Vector3d current_position;
-        
+        // DONE: Get the current position.
+        Eigen::Vector3d current_position = _vehicle_global_position->position();
 
         switch (state) {
             // When we first start, get the starting position
@@ -67,6 +73,11 @@ public:
                 // TODO: Check if the vehicle has reached the starting setpoint
                 // using positionReached(). If it has, transition to the
                 // FollowingSetpoints state.
+                _goto_setpoint->update(_starting_setpoint);
+                if (positionReached(_starting_setpoint)){
+                    state = State::FollowingSetpoints;
+                    
+                }
                 
                 break;
             }
@@ -74,20 +85,28 @@ public:
             // Now, we follow setpoints.
             case State::FollowingSetpoints: {
                 
-                // TODO: Compute the current setpoint by adding the current vector
+                // DONE: Compute the current setpoint by adding the current vector
                 // from _setpoints to _starting_setpoint using
                 // px4_ros2::addVectorToGlobalPosition.
-                Eigen::Vector3d current_setpoint;
+                Eigen::Vector3d current_setpoint = px4_ros2::addVectorToGlobalPosition(_starting_setpoint, _setpoints[_setpoint_index]);
+                
 
                 
-                // TODO: Use px4_ros2::horizontalDistanceToGlobalPosition to compute
+                // DONE: Use px4_ros2::horizontalDistanceToGlobalPosition to compute
                 // the distance to the current setpoint.
-                float distance_to_setpoint;
+                float distance_to_setpoint = px4_ros2::horizontalDistanceToGlobalPosition(current_position, current_setpoint);
 
                 if (distance_to_setpoint < 0.1f) {
-                    // TODO: Increment the _setpoint_index - keep in mind we
+                    // DONE: Increment the _setpoint_index - keep in mind we
                     // only have 4 setpoints.
-
+                    if(_setpoint_index < 3){
+                        _setpoint_index++;
+                    }
+                    else
+                    {
+                        _setpoint_index = 0;
+                    }
+                    
                     // ----
 
                     RCLCPP_INFO(node().get_logger(),
@@ -100,20 +119,28 @@ public:
                     
                 }
                 
-                // TODO: Calculate the target heading using
+                // DONE: Calculate the target heading using
                 // px4_ros2::headingToGlobalPosition.
-                float target_heading;
+                float target_heading = px4_ros2::headingToGlobalPosition(current_position, current_setpoint);
                 
                 // TODO: Update the desired drone position using _goto_setpoint->update.
                 // However, if the distance to the setpoint is less than 1.0f,
                 // do not specify a heading. At close distances, the heading 
                 // calculation can give an undefined result.
+                if(distance_to_setpoint > 1.0f){
+                    _goto_setpoint->update(current_setpoint, target_heading);
+                }
+                else
+                {
+                    _goto_setpoint->update(current_setpoint);
+                }
                 
                    
                 break;
                 }
         }
         // TODO: Increment the time_ctr variable by dt_s.
+        time_ctr += dt_s;
     }
 
 private:

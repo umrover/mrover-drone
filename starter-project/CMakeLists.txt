@@ -17,6 +17,11 @@ find_package(ament_cmake REQUIRED)
 # TODO: add similar find_package calls for each dependency in package.xml
 #   We need a find_package for each <build_depend>, <buildtool_depend>, and
 #   <exec_depend> dependency from package.xml.
+find_package(rclcpp REQUIRED)
+find_package(px4_ros2_cpp REQUIRED)
+find_package(px4_msgs REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 # Adds directories for header files.
 include_directories(include ${Eigen3_INCLUDE_DIRS})
@@ -26,9 +31,7 @@ add_executable(starter_project_node
         src/starter_project_node.cpp)     
 
 # TODO: Add the rest of the dependencies
-ament_target_dependencies(starter_project_node Eigen3
-    # We need 2 more dependencies
-)
+ament_target_dependencies(starter_project_node ament_cmake px4_msgs Eigen3 px4_ros2_cpp rclcpp)
 
 # Install executables to the correct directory.
 install(TARGETS
