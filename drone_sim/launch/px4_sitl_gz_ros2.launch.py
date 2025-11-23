@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, SetEnvironmentVariable, DeclareLaunchArgument
+from launch.actions import ExecuteProcess, SetEnvironmentVariable, DeclareLaunchArgument, TimerAction
 from launch.substitutions import LaunchConfiguration
 
 def find_qgc_appimage():
@@ -51,18 +51,21 @@ def generate_launch_description():
         output="screen"
     )
 
-    # Start ROS 2 <-> PX4 bridge (MicroRTPS Agent) 
-    rtps_agent = ExecuteProcess(
-        cmd=[
-            'micrortps_agent', '-t', 'UDP',
-            '-r', '14540',  # receive from PX4
-            '-s', '14541'   # send to PX4
-        ],
-        output='screen'
+    # Start ROS 2 <-> PX4 bridge (MicroXRCE Agent) 
+    rtps_agent = TimerAction(
+        period=5.0,
+        actions=[
+            ExecuteProcess(
+                cmd=['MicroXRCEAgent', 'udp4', '-p', '8888'],
+                cwd=px4_dir,
+                output='screen'
+            )
+        ]
     )
 
     # Optional QGroundControl
     qgc_path = find_qgc_appimage()
+    print(qgc_path)
     qgc_process = None
     if qgc_path:
         qgc_process = ExecuteProcess(cmd=[qgc_path], output="screen")
@@ -74,6 +77,7 @@ def generate_launch_description():
     ]
     actions += env_actions
     actions.append(px4_process)
+    actions.append(rtps_agent)
     if qgc_process:
         actions.append(qgc_process)
 
