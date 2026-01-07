@@ -1,0 +1,42 @@
+# docker compose -f 'docker/compose.yml' up -d --build 'mrover-drone'  
+services:
+  mrover-drone:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.devel
+    container_name: mrover-drone
+    privileged: true
+    ipc: host
+    pid: host
+    environment:
+      - ROS_DOMAIN_ID=5
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      - SSH_AUTH_SOCK=/ssh-agent
+      - PX4_HOME=/home/mrover/drone_deps/PX4-Autopilot
+    volumes:
+      - /dev:/dev
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ..:/home/mrover/ros2_ws/src/mrover_drone
+      - ${HOME}/.ssh:/home/mrover/.ssh:ro
+      - ros_colcon_install:/home/mrover/ros2_ws/install
+      - ros_colcon_build:/home/mrover/ros2_ws/build
+      - ros_colcon_log:/home/mrover/ros2_ws/log
+    devices:
+      - /dev:/dev
+    stdin_open: true
+    tty: true
+    command: /bin/zsh
+    user: mrover
+    ports:
+      - "14550:14550/udp"
+      - "14555:14555/udp"
+      - "14580:14580/udp"
+      - "4560:4560/tcp"
+      - "5760:5760/tcp"
+    cpu_count: 4
+volumes:
+  ros_colcon_install:
+  ros_colcon_build:
+  ros_colcon_log:
