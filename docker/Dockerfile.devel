@@ -102,7 +102,6 @@ EXPOSE 14550/udp
 EXPOSE 14556/udp
 EXPOSE 14557/udp
 
-ADD --chown=mrover:mrover docker/QGroundControl.AppImage /home/mrover/
 ADD --chown=mrover:mrover docker/entrypoint.sh /home/mrover/
 RUN chmod +x /home/mrover/entrypoint.sh
 
