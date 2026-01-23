@@ -172,10 +172,15 @@
       <static>true</static>
       <link name="body">
         <visual name="visual">
-          <pose>0 0 2 0 -0 0</pose>
+          <pose>0 0 -50 0 -0 0</pose>
           <cast_shadows>false</cast_shadows>
           <geometry>
-            <mesh><uri>model://terrain/mdrs_terrain.dae</uri></mesh>
+            <mesh>
+              <uri>model://terrain/mdrs_terrain.dae</uri>
+
+              <scale> 5 5 10</scale>
+              
+            </mesh>
           </geometry>
           <material>
 
@@ -190,11 +195,19 @@
           </material>
         </visual>
         <collision name="collision">
+
+          <pose>0 0 -50 0 -0 0</pose>
           <geometry>
+<!-- 
             <plane>
               <normal>0 0 1</normal>
-              <size>1 1</size>
-            </plane>
+              <size> 1 1</size>
+            </plane> -->
+
+            <mesh>
+              <uri>model://terrain/mdrs_terrain.dae</uri>
+              <scale>5 5 10</scale>
+            </mesh>
           </geometry>
           <surface>
             <friction>
