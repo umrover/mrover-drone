@@ -20,6 +20,7 @@ def generate_launch_description():
     # Launch configurations
     sim_model = LaunchConfiguration('sim_model')
     world     = LaunchConfiguration('world')
+    verbose_sim = LaunchConfiguration('verbose')
 
     px4_dir = os.getenv(
         "PX4_HOME",
@@ -41,6 +42,9 @@ def generate_launch_description():
         SetEnvironmentVariable("PX4_SIM_MODEL", sim_model),
         SetEnvironmentVariable("PX4_GZ_MODEL", sim_model),
         SetEnvironmentVariable("PX4_GZ_WORLD", world),
+        SetEnvironmentVariable("PX4_SITL_WORLD", world),
+        SetEnvironmentVariable("PX4_HOME", px4_dir),
+        SetEnvironmentVariable("VERBOSE_SIM", verbose_sim),
         SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", resource_paths),
     ]
 
@@ -74,6 +78,7 @@ def generate_launch_description():
     actions = [
         DeclareLaunchArgument("sim_model", default_value="gz_x500"),
         DeclareLaunchArgument("world", default_value="default"),
+        DeclareLaunchArgument("verbose", default_value="1"),
     ]
     actions += env_actions
     actions.append(px4_process)
