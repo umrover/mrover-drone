@@ -19,4 +19,5 @@ setup(
     entry_points={
         'console_scripts': [],
     },
+    scripts=['drone_sim/symlink_world.sh']
 )
