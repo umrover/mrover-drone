@@ -3,6 +3,7 @@ import os
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, SetEnvironmentVariable, DeclareLaunchArgument, TimerAction
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
 def find_qgc_appimage():
     search_paths = [
@@ -67,6 +68,16 @@ def generate_launch_description():
         ]
     )
 
+    # TODO: Add event handler to run this before px4.
+    move_world_to_px4_dir = Node(
+        package='drone_sim',
+        executable='symlink_world.sh',
+        namespace='symlink_world',
+        arguments=[world],
+        output='screen',
+        cwd=os.path.expanduser("~/ros2_ws/src/mrover_drone/drone_sim")
+    )
+
     # Optional QGroundControl
     qgc_path = find_qgc_appimage()
     print(qgc_path)
@@ -81,6 +92,7 @@ def generate_launch_description():
         DeclareLaunchArgument("verbose", default_value="1"),
     ]
     actions += env_actions
+    actions.append(move_world_to_px4_dir)
     actions.append(px4_process)
     actions.append(rtps_agent)
     if qgc_process:
