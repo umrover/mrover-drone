@@ -1,43 +1,25 @@
-"""
-Launch file for the starter project node.
-"""
+"""Launch the MAVROS offboard example node."""
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import ExecuteProcess
-from launch_ros.substitutions import FindPackagePrefix
-from launch.substitutions import PathJoinSubstitution
 
 
 def generate_launch_description() -> LaunchDescription:
-
-    # Get the directory where PX4-Autopilot is located
-    starter_project_pkg_dir = FindPackagePrefix("starter-project")
-
-    deps_directory = PathJoinSubstitution(
-        [starter_project_pkg_dir, '..', '..', 'deps', 'PX4-Autopilot']
-    )
-
-    px4_sitl = ExecuteProcess(
-        cmd=["make", "px4_sitl", "gz_x500"],
-        shell=True,
-        cwd=deps_directory
-    )
-
-    uXRCE = ExecuteProcess(
-        cmd=["MicroXRCEAgent", "udp4", "-p", "8888"],
-        shell=True,
-        cwd=deps_directory
-    )
-
-    starter_project_node = Node(
-        package="starter-project",
-        executable="starter_project_node",
-        output="screen"
+    starter_project_mavros_node = Node(
+        package="starter_project",
+        executable="starter_project_mavros_node",
+        name="starter_project_mavros_node",
+        output="screen",
+        parameters=[
+            {
+                "auto_offboard": False,
+                "auto_arm": False,
+                "mavros_prefix": "mavros/mavros",
+                "mavros_plugin_prefix": "mavros/mavros",
+            }
+        ],
     )
 
     return LaunchDescription([
-        px4_sitl,
-        uXRCE,
-        # starter_project_node
+        starter_project_mavros_node,
     ])
