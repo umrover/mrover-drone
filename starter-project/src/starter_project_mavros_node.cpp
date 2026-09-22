@@ -56,29 +56,17 @@ public:
             rclcpp::QoS(10).reliable().transient_local(),
             std::bind(&StarterProjectMavros::stateCallback, this, std::placeholders::_1));
 
-            /**
-             * Implement the pose_subscription. This subscription should call poseCallback
-             * to update the position of the drone stored within the node. Use the state_subscription
-             * as a guideline for this subscription
-             */
+        // Implement the pose subscription. It should receive the local pose and
+        // update the node's stored drone position using poseCallback.
         pose_subscription_ = create_subscription<geometry_msgs::msg::PoseStamped>(
-            /**
-             * This specifies the name of the node. If you are ever unsure, you can use ROS commands to see the active nodes.
-             */
             mavros_plugin_prefix_ + "/local_position/pose",
-        
-            /**
-             * This line determines how sensitive the data from the subscription is.
-             * In this case, we prioritize the newest sensor data over getting every update.
-             */
-             
             rclcpp::SensorDataQoS(),
 
             //TODO: Bind this subscription to the poseCallback function. Then, implement the poseCallback function.
+            //Refer to the State subscription if you need help on the syntax!
+            std::bind());
 
-            std::bind(&StarterProjectMavros::poseCallback, this, std::placeholders::_1));
-
-        //This sends the setpoint to MAVROS, which handles sending the drone to the setpoint.
+        // Publish the current target pose to MAVROS so PX4 can fly toward it.
         setpoint_publisher_ = create_publisher<geometry_msgs::msg::PoseStamped>(
             mavros_plugin_prefix_ + "/setpoint_position/local", 10);
 
@@ -94,7 +82,7 @@ public:
         const auto timer_period = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::duration<double>(1.0 / setpoint_rate_hz_));
 
-        //This defines a timer where after each timer period, the timerCallback function is called.
+        // Timer callback runs repeatedly at the configured setpoint rate.
         timer_ = create_wall_timer(
             timer_period,
             std::bind(&StarterProjectMavros::timerCallback, this));
@@ -118,7 +106,7 @@ private:
     using Pose = geometry_msgs::msg::PoseStamped;
     using State = mavros_msgs::msg::State;
 
-    //This is called every time the stateCallback 
+    // Store the latest MAVROS state reported by the flight controller.
     void stateCallback(const State::SharedPtr message)
     {
         state_ = *message;
@@ -127,7 +115,9 @@ private:
     void poseCallback(const Pose::SharedPtr message)
     {
         //Updates the pose stored in the node to the received pose
-        current_pose_ = *message;
+        //Update the current_pose into the contents of message. HINT:message is a pointer. 
+        //If you don't know what that means, ask!
+        current_pose_ = null;
         //Verifies that we have received a pose before
         pose_received_ = true;
 
@@ -143,19 +133,17 @@ private:
         }
     }
 
-    //Every timerPeriod this function is called
+    // Main control loop: wait for pose data, publish the current target, and
+    // request OFFBOARD/arming when needed before moving to the next waypoint.
     void timerCallback()
     {
-        //If the node doesn't have the drone's position, nothing happens
         if (!pose_received_) {
             RCLCPP_WARN_THROTTLE(
                 get_logger(), *get_clock(), 5000,
                 "Waiting for %s/local_position/pose", mavros_plugin_prefix_.c_str());
             return;
         }
-        //Publishes (sends to MAVROS) the current target setpoint.
         publishTarget();
-        //If the node isn't able to control the drone, nothing happens
         if (!state_.connected) {
             RCLCPP_WARN_THROTTLE(
                 get_logger(), *get_clock(), 5000,
@@ -185,7 +173,7 @@ private:
         }
     }
 
-        //This sends the target location held in the Node 
+    // Send the active target pose to MAVROS.
     void publishTarget()
     {
         target_pose_.header.stamp = now();
@@ -193,7 +181,8 @@ private:
         setpoint_publisher_->publish(target_pose_);
     }
 
-    //This function checks if the drone has arrived at its target and should now target the next setpoint
+    // Check whether the drone is close enough to the current target.
+    // If it is, move to the next waypoint in the sequence.
     void updateTargetIfReached()
     {
         //TODO: 1. Calculate the values dx, dy, dz. 
@@ -201,9 +190,10 @@ private:
         // 3. This distance is used to determine whether we are close enough to the target to change to the next setpoint
 
         const double dx = current_pose_.pose.position.x - target_pose_.pose.position.x;
-        const double dy = current_pose_.pose.position.y - target_pose_.pose.position.y;
-        const double dz = current_pose_.pose.position.z - target_pose_.pose.position.z;
-        const double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+        const double dy = 0;
+        const double dz = 0;
+        const double distance = 0;
+
 
         if (distance > position_tolerance_m_) {
             return;
@@ -218,11 +208,14 @@ private:
         }
 
         //Sets the target equal to the waypoint in the array that we want
-        const Waypoint & waypoint = waypoints_[waypoint_index_];
+        //TODO: Set the waypoint we are targetting to the proper value from the waypoints array.
+        const Waypoint & waypoint = null;
         target_pose_ = start_pose_;
-        target_pose_.pose.position.x += waypoint.x;
-        target_pose_.pose.position.y += waypoint.y;
-        target_pose_.pose.position.z += waypoint.z;
+
+        //TODO: add the waypoint positions to the start position to get the new target positions coordinates.
+        target_pose_.pose.position.x += 0;
+        target_pose_.pose.position.y += 0;
+        target_pose_.pose.position.z += 0;
 
         RCLCPP_INFO(
             get_logger(),
