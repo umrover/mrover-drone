@@ -7,9 +7,19 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rtcm_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+add_executable(rtk_gs_relay src/rtk_gs_relay.cpp)
+ament_target_dependencies(rtk_gs_relay rclcpp rtcm_msgs)
+
+install(TARGETS
+  rtk_gs_relay
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 
 if(BUILD_TESTING)

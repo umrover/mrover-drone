@@ -7,9 +7,18 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(mavros_msgs REQUIRED)
+
+# build RTK receiver node
+add_executable(rtk_receiver_node src/rtk_receiver_node.cpp)
+ament_target_dependencies(rtk_receiver_node rclcpp mavros_msgs)
+
+# ros2 run drone_fc rtk_receiver_node
+install(TARGETS
+  rtk_receiver_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -8,6 +8,7 @@
   <license>GPL-3.0</license>
 
   <depend>rclcpp</depend>
+  <depend>rtcm_msgs</depend>
 
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>mavros</exec_depend>
