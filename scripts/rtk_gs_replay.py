@@ -7,7 +7,7 @@ from rtcm_msgs.msg import Message as RTCMMessage
 DRONE_LAPTOP_IP = "192.168.1.20"  # Laptop 2's Ethernet IP
 UDP_PORT = 13370
 
-class SimpleRTKRelay(Node):
+class RTKrelay(Node):
     def __init__(self):
         super().__init__("rtk_relay_node")
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -25,7 +25,7 @@ class SimpleRTKRelay(Node):
 
 def main():
     rclpy.init()
-    node = SimpleRTKRelay()
+    node = RTKrelay()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
