@@ -92,7 +92,7 @@ def generate_launch_description():
                 LaunchConfiguration('config_yaml')
         ],
         remappings=[
-            ('/mavros/global_position/global', '/drone_odom'),
+            ('/mavros/global_position/global', '/drone_pos'),
         ]
     )
 
