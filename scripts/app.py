@@ -12,6 +12,7 @@ from PyQt6.QtCore import QTimer, Qt, pyqtSignal, QPointF
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Point
+import signal
 
 USE_FAKE_STREAM = True
 CAMERA_INDEX = 4 # /dev/video4
@@ -400,6 +401,12 @@ def main():
 
     app = QApplication(sys.argv)
     app.setStyleSheet(DARK_THEME)
+
+    # CRTL+C quit
+    def sigint_handler(*args):
+        print("\n[INFO] Shutting down...")
+        app.quit()
+    signal.signal(signal.SIGINT, sigint_handler)
 
     # create windows
     win1 = LiveFeedWindow(cap)
