@@ -10,7 +10,6 @@ output_dir = telemetry_dir / "gps_plots"
 output_dir.mkdir(parents=True, exist_ok=True)
 
 MIN_POINTS = 50
-STOP_ON_TAKEOFF = False # stop collecting if drone starts flying
 # earth radius in meters
 R = 6378137.0
 
@@ -27,11 +26,22 @@ tlog_files = sorted(telemetry_dir.glob("*.tlog"))
 print(f"Found {len(tlog_files)} .tlog files in {telemetry_dir}\n")
 
 for tlog_path in tlog_files:
+    # splitting prevents mixing takeoff and landing spots if drone flew in between
+    segments_by_fix = {ft: [] for ft in FIX_LABELS}
     # store lat/lon lists separately for each fix type
-    coords_by_fix = {ft: {"lats": [], "lons": []} for ft in FIX_LABELS}
+    current_seg = {ft: {"lats": [], "lons": []} for ft in FIX_LABELS}
+    was_stationary = False
+
     is_armed = False
     seen_vehicle_heartbeat = False
-    landed_state = False
+    landed_state = None # EXTENDED_SYS_STATE: 1 = ON_GROUND, 2 = IN_AIR, 3 = TAKEOFF, 4 = LANDING
+
+    def close_current_segments():
+        """Save any non-empty active segments and start a new one."""
+        for ft in FIX_LABELS:
+            if len(current_seg[ft]["lats"]) > 0:
+                segments_by_fix[ft].append(current_seg[ft])
+                current_seg[ft] = {"lats": [], "lons": []}
 
     try:
         mlog = mavutil.mavlink_connection(str(tlog_path))
@@ -46,40 +56,57 @@ for tlog_path in tlog_files:
             if msg_type == "HEARTBEAT":
                 if msg.type != mavutil.mavlink.MAV_TYPE_GCS and msg.autopilot != mavutil.mavlink.MAV_AUTOPILOT_INVALID:
                     seen_vehicle_heartbeat = True
+                    # bit 7 (128) of base_mode indicates whether drone is armed
                     is_armed = bool(msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
 
             elif msg_type == "EXTENDED_SYS_STATE":
                 landed_state = msg.landed_state
-                total_pts = sum(len(v["lats"]) for v in coords_by_fix.values())
-                # 2=IN_AIR, 3=TAKEOFF
-                if STOP_ON_TAKEOFF and landed_state in (2,3) and total_pts > 0:
-                    break
+                # if drone no longer on ground, close current segments
+                if landed_state != 1 and was_stationary:
+                    close_current_segments()
+                    was_stationary = False
 
             elif msg_type == "GPS_RAW_INT":
                 if msg.fix_type not in FIX_LABELS:
                     continue
 
-                if (landed_state is not None):
+                if landed_state is not None:
                     on_ground = (landed_state == 1)
                 else:
                     on_ground = (seen_vehicle_heartbeat and not is_armed)
                 
-                # 3: 3D fix, 4: DGPS, 5: RTK float, 6: RTK fix
-                if on_ground:
-                    coords_by_fix[msg.fix_type]["lats"].append(msg.lat / 1e7)
-                    coords_by_fix[msg.fix_type]["lons"].append(msg.lon / 1e7)
+                # msg.vel is groundspeed in cm/s (65535 = unknown); < 30 cm/s filters out walking/carrying
+                max_vel = 10 if msg.fix_type in (5, 6) else 30  # 10 cm/s for RTK, 30 cm/s for 3D/DGPS
+                not_walking = (msg.vel < max_vel) or (msg.vel == 65535)
+
+                if on_ground and not_walking:
+                    was_stationary = True
+                    if msg.fix_type in FIX_LABELS:
+                        current_seg[msg.fix_type]["lats"].append(msg.lat / 1e7)
+                        current_seg[msg.fix_type]["lons"].append(msg.lon / 1e7)
+                elif was_stationary:
+                    # drone started moving/flying: close segment so next stationary segment starts new one
+                    close_current_segments()
+                    was_stationary = False
+
+        close_current_segments()
     
     except Exception as e:
         print(f"[Error] {tlog_path.name}: {e}")
-        results.append({"fix": 99, "file": tlog_path.name, "fix": "-", "n": 0, "cep": "-", "r95": "-", "status": f"ERROR: {e}"})
+        results.append({"fix": "-", "n": 0, "cep": "-", "r95": "-", "file": tlog_path.name, "status": f"ERROR: {e}"})
         continue
 
+    # pick longest stationary segment for each fix_type
     for fix_type, label in FIX_LABELS.items():
-        lats = np.array(coords_by_fix[fix_type]["lats"])
-        lons = np.array(coords_by_fix[fix_type]["lons"])
+        if not segments_by_fix[fix_type]:
+            continue
+
+        best_seg = max(segments_by_fix[fix_type], key=lambda s: len(s["lats"]))
+        lats = np.array(best_seg["lats"])
+        lons = np.array(best_seg["lons"])
 
         if len(lats) < MIN_POINTS:
-            print(f"[SKIP] {tlog_path.name}: only {len(lats)} disarmed fixes (need {MIN_POINTS})")
+            print(f"[SKIP] {tlog_path.name}: only {len(lats)} stationary fixes (need {MIN_POINTS})")
             continue
 
         # mean is (0,0) in plot
@@ -110,6 +137,7 @@ for tlog_path in tlog_files:
         ax.add_patch(plt.Circle((0, 0), cep, color="green", fill=False, lw=2, label=f"CEP (50%): {cep:.3f}{unit}"))
         ax.add_patch(plt.Circle((0, 0), r95, color="red", fill=False, lw=2, linestyle="--", label=f"R95 (95%): {r95:.3f}{unit}"))
 
+        # force symmetric square limits around (0,0)
         lim = max(np.max(np.abs(x)), np.max(np.abs(y)), r95, 1e-6) * 1.15
         ax.set_xlim(-lim, lim)
         ax.set_ylim(-lim, lim)
@@ -146,7 +174,7 @@ print(f"\n{'Log File':<28} | {'Fix Type':<10} | {'Points':>6} | {'CEP (50%)':>10
 print("-" * 86)
 
 fix_order = {label: ft for ft, label in FIX_LABELS.items()}
-for r in sorted(results, key=lambda r: (fix_order.get(r["fix"]), r["file"])):
+for r in sorted(results, key=lambda r: (fix_order.get(r["fix"], 99), r["file"])):
     print(f"{r['file']:<28} | {r['fix']:<10} | {r['n']:>6} | {r['cep']:>10} | {r['r95']:>10} | {r['status']}")
 
 saved_count = sum(1 for r in results if r["status"] == "SAVED")
