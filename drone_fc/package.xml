@@ -7,6 +7,9 @@
   <maintainer email="umroverperception@gmail.com">mrover-drone</maintainer>
   <license>GPL-3.0</license>
 
+  <depend>rclcpp</depend>
+  <depend>mavros_msgs</depend>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
