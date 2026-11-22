@@ -56,7 +56,10 @@ if [ ! -f "/etc/ros/rosdep/sources.list.d/20-default.list" ]; then
     sudo rosdep init
 fi
 rosdep update
+# turn off u flag because setup.bash has some unset values
+set +u
 source /opt/ros/jazzy/setup.bash
+set -u
 rosdep install --from-paths "${base_paths[@]}" --ignore-src -r -y
 
 echo "[5/5] Installing PX4 toolchain & building SITL..."
