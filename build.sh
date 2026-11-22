@@ -16,12 +16,23 @@ fi
 
 echo "Using build profile: $build_profile"
 
+# resolve repo path
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# inside ros2 workspace?
+if [ "$(basename "$(dirname "${SCRIPT_DIR}")" = "src")" ]; then
+    WS_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+else
+    # standalone clone - testing
+    WS_DIR="${SCRIPT_DIR}"
+fi
 
 base_paths=()
 for dir in "${SCRIPT_DIR}"/*; do
     [ -d "$dir" ] || continue
-    [ "$(basename "$dir")" = "deps" ] && continue
+    case "$(basename "$dir")"
+        deps|build|install|log) continue ;;
+    esac
     base_paths+=("$dir")
 done
 for dir in "${SCRIPT_DIR}"/deps/*; do
@@ -31,7 +42,7 @@ for dir in "${SCRIPT_DIR}"/deps/*; do
 done
 
 # Build in the colcon workspace, not the package
-pushd "${SCRIPT_DIR}"/../..
+pushd "${WS_DIR}"
 
 cmake_args=(
     "-G" "Ninja"
