@@ -42,11 +42,12 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: ros2_ws/src/mrover_drone
     steps:
       - name: Checkout Drone repo & submodules
         uses: actions/checkout@v4
         with:
-          submodules recursive
+          submodules: recursive
           path: ros2_ws/src/mrover_drone
         
       - name: Compiler Cache
@@ -55,7 +56,5 @@ jobs:
       - name: Build drone packages
         working-directory: ros2_ws
         run: |
-          # prevent colcon from trying to build PX4 (too slow)
-          touch src/mrover_drone/deps/PX4-Autopilot/COLCON_IGNORE
           source /opt/ros/jazzy/setup.bash
-          colcon build --symlink-install --packages-select drone_fc drone_gs
+          ./build.sh Release
