@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
 echo "=========================================="
-echo "  MROVER Drone Automated Setup Script"
+echo "  MROVER Drone Setup"
 echo "=========================================="
 
 echo "[1/5] Updating Git submodules..."
@@ -38,6 +38,13 @@ sudo apt-get install -y \
     ros-jazzy-mavros-msgs \
     ros-jazzy-rtcm-msgs
 
+echo "Creating Python virtual env..."
+if [ ! -d "${SCRIPT_DIR}/.venv" ]; then
+    python3 -m venv --system-site-packages "${SCRIPT_DIR}/.venv"
+fi
+source "${SCRIPT_DIR}/.venv/bin/activate"
+
+pip install --upgrade pip
 pip install ruff==0.17.4 mypy==1.11.2
 
 echo "[3/5] Installing MAVROS GeographicLib datasets..."
