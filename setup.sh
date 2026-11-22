@@ -52,7 +52,9 @@ chmod +x ./scripts/install_geographiclib_datasets.sh
 sudo ./scripts/install_geographiclib_datasets.sh
 
 echo "[4/5] Installing rosdep..."
-sudo rosdep init
+if [ ! -f "/etc/ros/rosdep/sources.list.d/20-default.list" ]; then
+    sudo rosdep init
+fi
 rosdep update
 source /opt/ros/jazzy/setup.bash
 rosdep install --from-paths "${base_paths[@]}" --ignore-src -r -y
