@@ -30,7 +30,7 @@ fi
 base_paths=()
 for dir in "${SCRIPT_DIR}"/*; do
     [ -d "$dir" ] || continue
-    case "$(basename "$dir")"
+    case "$(basename "$dir")" in
         deps|build|install|log) continue ;;
     esac
     base_paths+=("$dir")
