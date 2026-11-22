@@ -66,7 +66,7 @@ echo "[5/5] Installing PX4 toolchain & building SITL..."
 bash ./deps/PX4-Autopilot/Tools/setup/ubuntu.sh
 pushd ./deps/PX4-Autopilot
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
-DONT_RUN=1 make px4_sitl gz_x500
+make px4_sitl_default
 popd
 
 echo "=========================================="
