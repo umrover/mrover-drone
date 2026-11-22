@@ -14,19 +14,21 @@ jobs:
     name: Style Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@7
         with:
-          python-versio: "3.12"
+          python-version: "3.x"
       
       - name: Install Python style tools
         run: pip install ruff==0.17.4 mypy==1.11.2
-
+      
       - name: Install clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format-18 shellcheck
+          sudo apt-get install -y clang-format-18
+      
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
       
       - name: Run Style Check
         run: ./scripts/style.sh
