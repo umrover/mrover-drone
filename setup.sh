@@ -63,7 +63,7 @@ set -u
 rosdep install --from-paths "${base_paths[@]}" --ignore-src -r -y
 
 echo "[5/5] Installing PX4 toolchain & building SITL..."
-bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+bash ./deps/PX4-Autopilot/Tools/setup/ubuntu.sh
 pushd ./deps/PX4-Autopilot
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
 DONT_RUN=1 make px4_sitl gz_x500
