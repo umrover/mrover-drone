@@ -1,0 +1,61 @@
+name: Drone CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - integration
+
+jobs:
+  style:
+    name: Style Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@5
+        with:
+          python-versio: "3.12"
+      
+      - name: Install Python style tools
+        run: pip install ruff==0.17.4 mypy==1.11.2
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-18 shellcheck
+      
+      - name: Run Style Check
+        run: ./scripts/style.sh
+  
+  build:
+    name: Build (ROS2 Jazzy - Noble)
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    needs: style
+    container:
+      # use mrover's pre-built ros2 jazzy container
+      image: umrover1/ros2-ci:Noble
+      options: --user root
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Drone repo & submodules
+        uses: actions/checkout@v4
+        with:
+          submodules recursive
+          path: ros2_ws/src/mrover_drone
+        
+      - name: Compiler Cache
+        uses: hendrikmuhs/ccache-action@v1.2.24
+      
+      - name: Build drone packages
+        working-directory: ros2_ws
+        run: |
+          # prevent colcon from trying to build PX4 (too slow)
+          touch src/mrover_drone/deps/PX4-Autopilot/COLCON_IGNORE
+          source /opt/ros/jazzy/setup.bash
+          colcon build --symlink-install --packages-select drone_fc drone_gs
