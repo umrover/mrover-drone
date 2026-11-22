@@ -56,4 +56,4 @@ deps/install
 deps/log
 log/
 
-venv/
+*venv/
