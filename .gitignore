@@ -57,3 +57,4 @@ deps/log
 log/
 
 *venv/
+.cache/

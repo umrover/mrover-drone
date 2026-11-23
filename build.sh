@@ -37,6 +37,7 @@ for dir in "${SCRIPT_DIR}"/*; do
 done
 for dir in "${SCRIPT_DIR}"/deps/*; do
     [ -d "$dir" ] || continue
+    # don't colcon build PX4
     [ "$(basename "$dir")" = "PX4-Autopilot" ] && continue
     base_paths+=("$dir")
 done
