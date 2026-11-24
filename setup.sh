@@ -45,7 +45,7 @@ fi
 source "${SCRIPT_DIR}/.venv/bin/activate"
 
 pip install --upgrade pip
-pip install ruff==0.17.4 mypy==1.11.2
+pip install ruff==0.17.5 mypy==1.11.2
 
 echo "[3/5] Installing MAVROS GeographicLib datasets..."
 chmod +x ./scripts/install_geographiclib_datasets.sh
