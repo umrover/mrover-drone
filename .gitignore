@@ -58,3 +58,5 @@ log/
 
 venv/
 .venv/
+.cache/
+.ruff_cache/
