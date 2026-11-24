@@ -55,3 +55,8 @@ deps/build
 deps/install
 deps/log
 log/
+
+venv/
+.venv/
+.cache/
+.ruff_cache/
