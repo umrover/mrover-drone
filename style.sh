@@ -18,7 +18,7 @@ CLANG_FORMAT_ARGS=(
 )
 RUFF_ARGS=(
   "--line-length=120"
-  "--exclude=deps,build,install,venv,.venv"
+  "--exclude=deps,build,install,venv,.venv" 
 )
 if [ -f "${SCRIPT_DIR}/pyproject.toml" ]; then
   RUFF_ARGS+=("--config=${SCRIPT_DIR}/pyproject.toml")
@@ -93,7 +93,7 @@ if command -v shellcheck &> /dev/null; then
     ./**/*.sh
   )
   # SC2155 is separate declaration and command.
-  if [ ${SHELL_FILES[@]} -gt 0 ]; then
+  if [ ${#SHELL_FILES[@]} -gt 0 ]; then
     shellcheck --shell=bash --exclude=SC2155 "${SHELL_FILES[@]}"
   fi
   echo "Done"
