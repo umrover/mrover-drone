@@ -37,11 +37,15 @@ jobs:
     name: Build (ROS2 Jazzy - Noble)
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
-    needs: style
     container:
       # use mrover's pre-built ros2 jazzy container
-      image: umrover1/ros2-ci:Noble
+      image: umrover1/ros2-ci:noble
       options: --user root
+    needs: style
+    env:
+      # directory owned by mrover so CI can write to it and use caching
+      # this is new for ubuntu 24
+      HOME: /home/mrover
     defaults:
       run:
         shell: bash
