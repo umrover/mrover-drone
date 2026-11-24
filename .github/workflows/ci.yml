@@ -51,11 +51,30 @@ jobs:
         shell: bash
         working-directory: ros2_ws/src/mrover_drone
     steps:
-      - name: Checkout Drone repo & submodules
+      - name: Checkout Drone repo
         uses: actions/checkout@v7
         with:
-          submodules: recursive
           path: ros2_ws/src/mrover_drone
+
+      # only checkout 2 submodules we actually build
+      - name: Checkout ROS2 submodules
+        working-directory: ros2_ws/src/mrover_drone
+        run: git submodule update --init deps/px4_msgs deps/px4-ros2-interface-lib
+      
+      - name: Compute submodule hash
+        id: submodule-hash
+        working-directory: ros2_ws/src/mrover_drone
+        run: echo "hash=$(git submodule status deps/px4_msg deps/px4-ros2-interface-lib | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+    
+      - name: Cache compiled ROS2 deps
+        uses: actions/cache@v6
+        with:
+          path: |
+            ros2_ws/build/Release/px4_msgs
+            ros2_ws/install/Release/px4_msgs
+            ros2_ws/build/Release/px4_ros2_cpp
+            ros2_ws/install/Release/px4_ros2_cpp
+          key: drone-deps-jazzy-${{ steps.submodule-hash.outputs.hash }}
         
       - name: Compiler Cache
         uses: hendrikmuhs/ccache-action@v1.2.24

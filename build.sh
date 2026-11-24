@@ -35,11 +35,9 @@ for dir in "${SCRIPT_DIR}"/*; do
     esac
     base_paths+=("$dir")
 done
-for dir in "${SCRIPT_DIR}"/deps/*; do
-    [ -d "$dir" ] || continue
-    # don't colcon build PX4
-    [ "$(basename "$dir")" = "PX4-Autopilot" ] && continue
-    base_paths+=("$dir")
+# skip example tutorials in px4-ros2-interface-lib/examples
+for dep_pkg in "deps/px4_msgs" "deps/px4-ros2-interface-lib/px4_ros2_cpp"; do
+    [ -d "${SCRIPT_DIR}/${dep_pkg}" ] && base_paths+=("${SCRIPT_DIR}/${dep_pkg}")
 done
 
 # Build in the colcon workspace, not the package
