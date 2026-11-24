@@ -14,12 +14,12 @@ using namespace px4_msgs::msg;
 
 class HeartbeatNode : public rclcpp::Node {
 public:
-  HeartbeatNode();
+    HeartbeatNode();
 
 private:
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<OffboardControlMode>::SharedPtr
-      offboard_control_mode_publisher_;
+    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::Publisher<OffboardControlMode>::SharedPtr
+            offboard_control_mode_publisher_;
 
-  void publish_offboard_control_mode();
+    void publish_offboard_control_mode();
 };
