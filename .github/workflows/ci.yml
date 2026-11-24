@@ -66,8 +66,7 @@ jobs:
           apt-get install -y \
             python3-colcon-common-extensions \
             ninja-build \
-            ros-jazzy \
-            ros-jazzy \
+            ros-jazzy-mavros-msgs \
             ros-jazzy-rtcm-msgs
       
       - name: Build drone packages
