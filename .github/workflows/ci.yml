@@ -59,6 +59,16 @@ jobs:
         
       - name: Compiler Cache
         uses: hendrikmuhs/ccache-action@v1.2.24
+
+      - name: Install colcon & ros deps
+        run: |
+          apt-get update
+          apt-get install -y \
+            python3-colcon-common-extensions \
+            ninja-build \
+            ros-jazzy \
+            ros-jazzy \
+            ros-jazzy-rtcm-msgs
       
       - name: Build drone packages
         working-directory: ros2_ws/src/mrover_drone
