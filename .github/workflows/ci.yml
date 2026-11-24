@@ -52,7 +52,7 @@ jobs:
         working-directory: ros2_ws/src/mrover_drone
     steps:
       - name: Checkout Drone repo & submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
           path: ros2_ws/src/mrover_drone
