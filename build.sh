@@ -20,7 +20,7 @@ echo "Using build profile: $build_profile"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # inside ros2 workspace?
-if [ "$(basename "$(dirname "${SCRIPT_DIR}")" = "src")" ]; then
+if [ "$(basename "$(dirname "${SCRIPT_DIR}")")" = "src" ]; then
     WS_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 else
     # standalone clone - testing
@@ -31,7 +31,7 @@ base_paths=()
 for dir in "${SCRIPT_DIR}"/*; do
     [ -d "$dir" ] || continue
     case "$(basename "$dir")" in
-        deps|build|install|log) continue ;;
+        deps|build|install|log|venv) continue ;;
     esac
     base_paths+=("$dir")
 done
@@ -68,7 +68,7 @@ COLCON_EXTENSION_BLOCKLIST=colcon_core.event_handler.desktop_notification colcon
     --symlink-install \
     --event-handlers console_direct+ \
     --build-base "build/$build_profile" \
-    --install-base "install/$build_profile" \
+    --install-base "install/$build_profile"
 
 # symlink compile_commands.json into each package folder
 for dir in "${SCRIPT_DIR}"/*/; do
