@@ -61,7 +61,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2.24
       
       - name: Build drone packages
-        working-directory: ros2_ws
+        working-directory: ros2_ws/src/mrover_drone
         run: |
           source /opt/ros/jazzy/setup.bash
           ./build.sh Release
