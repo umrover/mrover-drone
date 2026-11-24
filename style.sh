@@ -43,9 +43,9 @@ function find_executable() {
 }
 
 ## Check that all tools are installed
-CLANG_FORMAT_PATH=$(find_executable clang-format-18 18.1)
+CLANG_FORMAT_PATH=$(find_executable clang-format-18 "18.1" "sudo apt install clang-format-18")
 readonly CLANG_FORMAT_PATH
-RUFF_PATH=$(find_executable ruff 0.17.5)
+RUFF_PATH=$(find_executable ruff "0.17.5" "pip install ruff==0.17.5")
 readonly RUFF_PATH
 
 ## Run checks
