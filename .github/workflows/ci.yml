@@ -1,0 +1,95 @@
+name: Drone CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - integration
+      - build-and-CI
+
+jobs:
+  style:
+    name: Style Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+      
+      - name: Install Python style tools
+        run: pip install ruff==0.17.5 mypy==1.11.2
+      
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-18
+      
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      
+      - name: Run Style Check
+        run: ./style.sh
+  
+  build:
+    name: Build (ROS2 Jazzy - Noble)
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    container:
+      # use mrover's pre-built ros2 jazzy container
+      image: umrover1/ros2-ci:noble
+      options: --user root
+    needs: style
+    env:
+      # directory owned by mrover so CI can write to it and use caching
+      # this is new for ubuntu 24
+      HOME: /home/mrover
+    defaults:
+      run:
+        shell: bash
+        working-directory: ros2_ws/src/mrover_drone
+    steps:
+      - name: Checkout Drone repo
+        uses: actions/checkout@v7
+        with:
+          path: ros2_ws/src/mrover_drone
+
+      # only checkout 2 submodules we actually build
+      - name: Checkout ROS2 submodules
+        working-directory: ros2_ws/src/mrover_drone
+        run: git submodule update --init deps/px4_msgs deps/px4-ros2-interface-lib
+      
+      - name: Compute submodule hash
+        id: submodule-hash
+        working-directory: ros2_ws/src/mrover_drone
+        run: echo "hash=$(git submodule status deps/px4_msg deps/px4-ros2-interface-lib | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+    
+      - name: Cache compiled ROS2 deps
+        uses: actions/cache@v6
+        with:
+          path: |
+            ros2_ws/build/Release/px4_msgs
+            ros2_ws/install/Release/px4_msgs
+            ros2_ws/build/Release/px4_ros2_cpp
+            ros2_ws/install/Release/px4_ros2_cpp
+          key: drone-deps-jazzy-${{ steps.submodule-hash.outputs.hash }}
+        
+      - name: Compiler Cache
+        uses: hendrikmuhs/ccache-action@v1.2.24
+
+      - name: Install colcon & ros deps
+        run: |
+          apt-get update
+          apt-get install -y \
+            python3-colcon-common-extensions \
+            ninja-build \
+            ros-jazzy-mavros-msgs \
+            ros-jazzy-rtcm-msgs
+      
+      - name: Build drone packages
+        working-directory: ros2_ws/src/mrover_drone
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          ./build.sh Release
